@@ -1,0 +1,30 @@
+class Solution {    
+public:
+    vector<vector<int>> directions{{-1,0},{0,1},{1,0},{0,-1}};
+
+    void dfs(int row, int col, vector<vector<int>> &ans, vector<vector<int>> &image, int color, int iniColor){
+        ans[row][col]= color;
+
+        int m=image.size();
+        int n=image[0].size();
+
+        for(vector<int> &dir: directions){
+            int nRow=dir[0] + row;
+            int nCol=dir[1] + col;
+
+            if(nRow>=0 && nRow<m && nCol>=0 && nCol<n &&
+             image[nRow][nCol]==iniColor && ans[nRow][nCol]!=color){
+                dfs(nRow, nCol, ans, image, color, iniColor);
+             }
+        }
+    }
+    
+    vector<vector<int>> floodFill(vector<vector<int>>& image, int sr, int sc, int color) {
+        int iniColor=image[sr][sc];
+        vector<vector<int>> ans = image;
+        
+        dfs(sr, sc, ans, image, color, iniColor);
+
+        return ans;
+    }
+};
