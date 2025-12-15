@@ -1,0 +1,46 @@
+class Solution {
+public:
+    vector<int> eventualSafeNodes(vector<vector<int>>& graph) {
+        int n = graph.size();
+
+        vector<vector<int>> revAdj(n);
+        vector<int> outdegree(n, 0);
+
+        //Reverse the graph's edges
+        for(int u=0; u<n; u++){
+            outdegree[u]=graph[u].size();
+            for(int i=0; i<graph[u].size(); i++){
+                int v=graph[u][i];
+                revAdj[v].push_back(u);
+            }
+        }
+
+        //push terminal nodes to the queue
+        queue<int> q;
+        for(int i=0; i<n; i++){
+            if(outdegree[i]==0) q.push(i);
+        }
+
+        //BFS
+        while(!q.empty()){
+            int node=q.front();
+            q.pop();
+
+            for(int i=0; i<revAdj[node].size(); i++){
+                int prev = revAdj[node][i];
+                outdegree[prev]--;
+                if(outdegree[prev]==0){
+                    q.push(prev);
+                }
+            }
+        }
+
+        //Store the safeNodes
+        vector<int> safeNodes;
+        for(int i=0; i<n; i++){
+            if(outdegree[i]==0) safeNodes.push_back(i);
+        }
+
+        return safeNodes;
+    }
+};
