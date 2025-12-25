@@ -1,0 +1,71 @@
+class Solution {
+public:
+    vector<int> parent ,  rank;
+    
+    int findParent(int x){
+        if(parent[x] == x) return x;
+
+        return parent[x] = findParent(parent[x]);
+    }
+
+    void unionByRank(int u , int v){
+        int ulp_u = findParent(u);
+        int ulp_v = findParent(v);
+
+        if(ulp_u == ulp_v) return;
+
+        if(rank[ulp_u] < rank[ulp_v] ) {
+            parent[ulp_u] = ulp_v;
+        }
+        else if(rank[ulp_v] < rank[ulp_u]){
+            parent[ulp_v] = ulp_u;
+        }
+        else{
+            parent[ulp_v] = ulp_u;
+            rank[ulp_u]++;
+        }
+    }
+
+    int removeStones(vector<vector<int>>& stones) {
+        int n = stones.size();
+
+        int maxRow=0 , maxCol=0;
+
+        for(auto &s : stones){
+            maxRow = max(maxRow , s[0]);
+            maxCol = max(maxCol , s[1]);
+        }
+
+        int totalNodes = maxRow + maxCol + 2;
+
+        parent.resize(totalNodes);
+        rank.resize(totalNodes , 0);
+
+        for(int i=0; i< totalNodes; i++){
+            parent[i] = i;
+        }
+
+        unordered_set<int> used;
+
+        for(auto &s: stones){
+            int row = s[0];
+            int col = s[1] + maxRow + 1;
+
+            unionByRank(row , col);
+
+            used.insert(row);
+            used.insert(col);
+
+
+
+        }
+
+        int components = 0;
+
+        for(auto node : used){
+            if(parent[node] == node) components++;
+        }
+
+        return n -  components;
+    }
+};
