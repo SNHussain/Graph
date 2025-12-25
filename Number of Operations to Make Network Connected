@@ -1,0 +1,56 @@
+class Solution {
+public:
+    vector<int> parent , rank;
+
+    int findParent(int x){
+        if(parent[x] == x) return x;
+
+        return parent[x] = findParent(parent[x]);
+    }
+
+    void unionByRank(int u, int v){
+        int ulp_u = findParent(u);
+        int ulp_v = findParent(v);
+
+        if(ulp_u == ulp_v) return;
+
+        if(rank[ulp_u] < rank[ulp_v]) parent[ulp_u] =ulp_v;
+        else if(rank[ulp_v] < rank[ulp_u]) parent[ulp_v] = ulp_u;
+        else{
+            parent[ulp_v] = ulp_u;
+            rank[ulp_u]++;
+        }
+    }
+    int makeConnected(int n, vector<vector<int>>& connections) {
+        if(connections.size() < n-1) return -1;
+
+        parent.resize(n);
+        rank.resize(n , 0);
+
+        for(int i=0; i<n; i++){
+            parent[i] = i;
+        }
+
+        int extra = 0;
+        for(auto &e: connections){
+            int u = e[0];
+            int v = e[1];
+
+            if(findParent(u) == findParent(v)) {
+                extra++;
+            }
+            else{
+                unionByRank(u , v);
+            }
+        }
+
+        int components = 0;
+
+        for(int i=0; i<n; i++){
+            if(findParent(i) == i) components++;
+             
+        }
+
+        return (extra >= components -1) ? components - 1 : -1;
+    }
+};
