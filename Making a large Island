@@ -1,0 +1,93 @@
+class Solution {
+public:
+    vector<int> parent , size ;
+    int findParent(int x){
+        if(parent[x] == x) return x;
+        return parent[x] = findParent(parent[x]);
+    }
+
+    void unionBySize(int u, int v){
+        int ulp_u = findParent(u);
+        int ulp_v = findParent(v);
+
+        if(ulp_u == ulp_v) return;
+        
+        if(size[ulp_u] < size[ulp_v]){
+            parent[ulp_u] = ulp_v;
+            size[ulp_v] += size[ulp_u];
+        }
+        else{
+            parent[ulp_v] = ulp_u;
+            size[ulp_u] += size[ulp_v];
+        }
+    }
+
+    int largestIsland(vector<vector<int>>& grid) {
+        int n = grid.size();
+
+        parent.resize(n * n);
+        size.resize(n * n, 1);
+
+        for(int i=0; i<n*n; i++){
+            parent[i] = i;
+        }
+
+        int dr[] = {-1, 1, 0, 0};
+        int dc[] = {0 , 0, -1, 1};
+
+        //step1 : Build DSU of all the components (all 1s)
+        for(int r=0; r<n; r++){
+            for(int c=0; c<n; c++){
+                if(grid[r][c] == 0) continue;
+
+                int node = r*n +c;
+                for(int i=0; i<4; i++){
+                    int nr = r + dr[i];
+                    int nc = c + dc[i];
+
+                    if(nr>=0 && nr<n && nc>=0 && nc<n && grid[nr][nc] == 1){
+                        int adjNode = nr *n + nc;
+                        unionBySize(node , adjNode);
+                    }
+                }
+            }
+        }
+
+        int maxIsland = 0;
+        //step2 : flipping the 0 and avoid duplicates
+         for(int r=0; r<n; r++){
+            for(int c=0; c<n; c++){
+                if(grid[r][c] == 1) continue;
+
+                unordered_set<int> components;
+                int currSize = 1;
+                for(int i=0; i<4; i++){
+                    int nr = r + dr[i];
+                    int nc = c + dc[i];
+
+                    if(nr>=0 && nr<n && nc>=0 && nc<n && grid[nr][nc] == 1){
+                        int adjNode = nr *n + nc;
+                        int parentNode = findParent(adjNode);
+
+                        if(components.find(parentNode) == components.end()){
+                            components.insert(parentNode);
+                            currSize += size[parentNode];
+                        }
+                    }
+                }
+
+                maxIsland = max(maxIsland , currSize);
+            }
+        }
+
+        //step3 : edge case (matrix full of 1 only)
+
+        for(int i=0; i<n*n ; i++){
+            if(parent[i] == i){
+                maxIsland = max(maxIsland , size[i]);
+            }
+        }
+
+        return maxIsland;
+    }
+};
